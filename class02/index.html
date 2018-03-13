@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		border: 1px solid #cc0000;
+		overflow: visible;
+		padding: 30px;
+	}
+</style>
+
+<body>
+<!-- 	<h1>Hello, World!</h1>
+	<svg>
+
+	</svg> -->
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var data = [
+    	{"x":8, "y":    6.58, "group": "IV"},
+	    {"x":8, "y":    5.76, "group": "IV"},
+	    {"x":8, "y":    7.71, "group": "IV"},
+	    {"x":8, "y":    8.84, "group": "IV"},
+	    {"x":8, "y":    8.47, "group": "IV"},
+	    {"x":8, "y":    7.04, "group": "IV"},
+	    {"x":8, "y":    5.25, "group": "IV"},
+	    {"x":19,"y":    12.5, "group": "IV"},
+	    {"x":8, "y":    5.56, "group": "IV"},
+	    {"x":8, "y":    7.91, "group": "IV"},
+	    {"x":8, "y":    6.89, "group": "IV"}
+	]	
+
+	var height = 200
+	var width = 400;
+
+	var maxX = d3.max(data, function(d) { return d.x; });
+
+	var maxY = d3.max(data, function(d) { return d.y; });
+
+
+	var xScale = d3.scaleLinear()
+	.domain([0,maxX+2])
+	.range([0,width]);
+
+	var yScale = d3.scaleLinear()
+	.domain([0,maxY+2])
+	.range([height,0]);
+
+	var x_axis = d3.axisBottom()
+					.scale(xScale)
+
+	var y_axis = d3.axisLeft()
+					.scale(yScale)
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Hello World!");
+	body.append("h2")
+		.text("Class 2");
+
+	var svg = body.append("svg")
+		.attr('width',width)
+		.attr('height',height);
+
+	svg.append('g')
+		.attr('transform','translate(0,'+height+')')
+		.call(x_axis)
+
+	svg.append('g')
+		.attr('transform','translate(0,0)')
+		.call(y_axis)
+
+	// data.forEach(function(d,i) {
+	// 	svg.append("circle")
+	// 		.attr("class","anscrombe-circle")
+	// 		.attr("r",10)
+	// 		.attr("cx",data[i].x)
+	// 		.attr("cy",data[i].y);
+	// })
+
+	// svg.selectAll()
+	var circle = svg.selectAll("circle")
+	.data(data)
+	.enter()
+	.append("circle")
+	.attr("r",4)
+	.attr("cx",function(d) { return xScale(d.x); })
+	.attr("cy",function(d) { return yScale(d.y); });
+
+
+</script>
