@@ -19,8 +19,8 @@
 <script>
 
 	var xScale = d3.scaleLinear()
-		.domain([0,20])
-		.range([0,300]);
+	.domain([0,20])
+	.range([0,300]);
 
 	var yScale = d3.scaleLinear()
 	.domain([0,15])
@@ -34,7 +34,7 @@
     {"x":8, "y":    8.47, "group": "IV"},
     {"x":8, "y":    7.04, "group": "IV"},
     {"x":8, "y":    5.25, "group": "IV"},
-    {"x":19, "y":    12.5, "group": "IV"},
+    {"x":19,"y":    12.5, "group": "IV"},
     {"x":8, "y":    5.56, "group": "IV"},
     {"x":8, "y":    7.91, "group": "IV"},
     {"x":8, "y":    6.89, "group": "IV"}
@@ -43,13 +43,13 @@
 	var body = d3.select("body");
 
 	body.append("h1")
-		.text("Hello World!")
+		.text("Hello World!");
 
 	// d3.select("h1").text("Hello 2")
 
 	// d3.select("svg").append("circle")
 	// var svg = d3.select("svg")
-	var svg = body.append("svg")
+	var svg = body.append("svg");
 
 	// data.forEach(function(d,i) {
 	// 	svg.append("circle")
@@ -66,7 +66,7 @@
 	.append("circle")
 	.attr("r",4)
 	.attr("cx",function(d) { return xScale(d.x); })
-	.attr("cy",function(d) { return yScale(d.y); })
+	.attr("cy",function(d) { return yScale(d.y); });
 
 
 </script>

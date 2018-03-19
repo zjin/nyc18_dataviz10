@@ -87,15 +87,15 @@
 			.call(y_axis
 				.tickSize(width));
 
+		var myGroup = data.filter(function(d) {return d.group == "II"; });
 
 		var circle = svg.selectAll("circle")
-		.data(data)
+		.data(myGroup)
 		.enter()
 		.append("circle")
 		.attr("r",4)
-		.attr("cx",function(d) { return xScale(parseInt(d.x)); })
-		.attr("cy",function(d) { return yScale(parseInt(d.y)); });
-
+		.attr("cx",function(d) { return xScale(d.x); })
+		.attr("cy",function(d) { return yScale(d.y); });
 	};
 
 </script>
