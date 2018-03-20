@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		border: 1px solid #cc0000;
+		/*overflow: visible;*/
+		/*padding: 30px;*/
+	}
+
+	.y1931 {
+		fill: red;
+		stroke: #fff;
+	}
+	.y1932 {
+		fill: blue;
+		stroke: #fff;
+	}
+	g.legend {
+		border: 1px sold #ff00ff;
+		fill: yellow;
+	}
+	text.legend {
+		fill: black;
+	}
+
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 20, bottom: 30, left: 100};
+
+	var height = 200 - margin.top - margin.bottom;
+	var width = 350 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Class 4");
+		
+	d3.tsv("barley.tsv",ready);
+
+	function ready(err, data) {
+
+		if (err) throw "Error loading data";
+
+		var years = [1931,1932];
+		
+		var minY = d3.min(data, function(d) { return +d.yield; });
+		var maxY = d3.max(data, function(d) { return +d.yield; });
+
+		var sites = data.map(function(d) { return d.site; })
+						.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+
+		var varieties = data.map(function(d) { return d.variety; })
+			.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+
+		var xScale = d3.scaleLinear()
+			.domain([minY-1,maxY+1])
+			.range([0, width]);
+
+		var yScale = d3.scalePoint()
+			.domain(varieties)
+			.range([height,0]);
+
+		var x_axis = d3.axisBottom()
+					.scale(xScale);
+
+		var y_axis = d3.axisLeft()
+						.scale(yScale);
+
+		sites.forEach(function(d){
+			drawChart(d)
+		});
+
+		function drawChart(site) {
+
+			var myData = data.filter(function(d) {return d.site == site; });	
+
+			body.append("h2")
+				.text(site);
+
+			var svg = body.append("svg")
+				.attr('width',width+margin.right+margin.right)
+				.attr('height',height+margin.top+margin.bottom)
+				.append('g')
+					.attr('transform','translate('+margin.left+','+margin.top+')');
+
+
+			svg.append('g')
+				.attr('transform','translate(0,'+height+')')
+				.call(x_axis);
+
+			svg.append('g')
+				.attr('transform','translate(0,0)')
+				.call(y_axis);
+
+			var circle = svg.selectAll("circle")
+				.data(myData)
+				.enter()
+				.append("circle")
+				.attr("r",4)
+				.attr('class',function(d) { return "y" + d.year; })
+				.attr("cx",function(d) { return xScale(d.yield); })
+				.attr("cy",function(d) { return yScale(d.variety); });
+
+			// var legend = svg
+			// 	.selectAll('.legend')
+			// 	.data(years)
+			// 	.enter()
+			// 	.append("g")
+			// 	.attr("class","legend")
+			// 	.attr('transform', function(d,i) { return 'translate(10,'+(i*20)+')' ; });
+
+			// legend.append('rect')
+			// 	.attr('width','20')
+			// 	.attr('height','10')
+			// 	.attr('class',function(d) { return "y"+d; } );
+
+			// legend.append('text')
+			// 	.attr('class','legend')
+			// 	.attr('x',30)
+			// 	.attr('y',10)
+			// 	.text(function(d) { return d; });
+	
+		}
+	};
+
+</script>
