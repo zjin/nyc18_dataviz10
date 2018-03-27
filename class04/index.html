@@ -61,6 +61,7 @@
 		var varieties = data.map(function(d) { return d.variety; })
 			.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
 
+
 		var xScale = d3.scaleBand()
 			.domain(varieties)
 			.range([0, width]);
@@ -87,7 +88,7 @@
 				.text(site);
 
 			var svg = body.append("svg")
-				.attr('width',width+margin.right+margin.right)
+				.attr('width',width+margin.left+margin.right)
 				.attr('height',height+margin.top+margin.bottom)
 				.append('g')
 					.attr('transform','translate('+margin.left+','+margin.top+')');

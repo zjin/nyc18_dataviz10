@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		border: 1px solid #cc0000;
+		overflow: visible;
+		/*padding: 30px;*/
+	}
+
+	.y1931 {
+		fill: red;
+		stroke: #fff;
+	}
+	.y1932 {
+		fill: blue;
+		stroke: #fff;
+	}
+	g.legend {
+		border: 1px sold #ff00ff;
+		fill: yellow;
+	}
+	text.legend {
+		fill: black;
+	}
+
+	rect.whaaa {
+		stroke: orange;
+		stroke-width: 2;
+		fill: none;
+	}
+
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 30, bottom: 30, left: 100};
+
+	var height = 200 - margin.top - margin.bottom;
+	var width = 500 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Class 5");
+		
+	d3.tsv("barley.tsv",ready);
+
+	function ready(err, data) {
+
+		if (err) throw "Error loading data";
+
+
+		var dataBySite = d3.nest()
+			.key(function(d) {return d.site; })
+			.entries(data);
+
+		dataBySite.forEach(function(d) {
+			d.averageYield = d3.mean(d.values, function(d) {return +d.yield; })
+
+			// //fetch all the varieties for thsi site
+			// var varietiesForSite = d.values.map(function(d) {
+			// 	return d.variety;
+			// });
+
+			// var uniqueVarieties = d3.set(varietiesForSite).entries();
+
+			// d.customYScale = d3.scalePoint()
+			// 	.domain(uniqueVarieties)
+			// 	.range([height,0]);
+
+		})
+
+		dataBySite.sort(function(a,b) {
+			return b.averageYield - a.averageYield;
+		})
+		console.log(dataBySite)
+
+		var site = body.selectAll("div.site")
+			.data(dataBySite)
+			.enter()
+			.append("div")
+			.attr("class","site");
+
+		site.append("h2")
+			.text(function(d) { return d.key; });
+
+		var svg = site.append("svg")
+			.attr('width',width+margin.left+margin.right)
+			.attr('height',height+margin.top+margin.bottom)
+			.append('g')
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		svg.append("rect")
+			.attr("width", width)
+			.attr("height", height)
+			.attr("class", "whaaa");
+
+		// console.log("width", width);
+
+		var minY = d3.min(data, function(d) { return +d.yield; });
+		var maxY = d3.max(data, function(d) { return +d.yield; });
+
+		var varieties = data.map(function(d) { return d.variety; })
+			.filter(function(item, i, ar){ return ar.indexOf(item) === i; });
+
+		var xScale = d3.scaleLinear()
+			.domain([0,100])
+			.range([0, width]);
+
+		var yScale = d3.scalePoint()
+			.domain(varieties)
+			.range([height,0]);
+
+		var x_axis = d3.axisBottom()
+					.scale(xScale);
+
+		var y_axis = d3.axisLeft()
+					.scale(yScale);
+
+		svg.append('g')
+			.attr('transform','translate(0,'+(height)+')')
+			.call(x_axis);
+
+		svg.append('g')
+			.attr('transform','translate(0,0)')
+			.call(y_axis);
+
+		var circle = svg.selectAll("circle")
+			.data(function(d) { return d.values; })
+			.enter()
+			.append("circle")
+			.attr("r",4)
+			.attr('class',function(d) { return "y" + d.year; })
+			.attr("cx",function(d) { return xScale(d.yield); })
+			.attr("cy",function(d) { return yScale(d.variety); });
+	};
+
+</script>
