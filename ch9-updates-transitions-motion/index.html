@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		border: 1px solid #cc0000;
+		overflow: visible;
+		/*padding: 30px;*/
+	}
+	
+	rect:hover {
+		fill: orange;
+	}
+
+/*	rect {
+		-moz-transition: all 0.25s;
+		-o-transition: all 0.25s;
+		-webkit-transition: all 0.25s;
+		transition: all 0.25s;
+	}
+*/
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 20, bottom: 20, left: 20};
+
+	var height = 250 - margin.top - margin.bottom;
+	var width = 640 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("CHAPTER 9");
+	body.append("h2")
+		.text("Updates, Transitions, and Motion")
+	body.append("p")
+		.text("Click on this text to update the chart with new data value.")
+		
+	
+	var numValues = 20;
+	dataset = [];
+	for (var i = 0; i < numValues; i++) {
+		var newNumber = Math.floor(Math.random() * 25);
+		dataset.push(newNumber);
+	}
+
+
+	var svg = body.append("svg")
+		.attr('width',width+margin.left+margin.right)
+		.attr('height',height+margin.top+margin.bottom)
+		.append('g')
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+	var xScale = d3.scaleBand()
+		.domain(d3.range(dataset.length))
+		.range([0, width])
+		.paddingInner(0.05);
+
+	var yScale = d3.scaleLinear()
+		.domain([0, 25])
+		.range([0, height]);
+
+	svg.selectAll("rect")
+		.data(dataset)
+		.enter()
+		.append("rect")
+		.attr("x", function(d,i) {
+			return xScale(i);
+		})
+		.attr("y", function(d) { return height - yScale(d); })
+		.attr("width", xScale.bandwidth())
+		.attr("height", function(d) { return yScale(d); })
+		.attr("fill", function(d) { return "rgb(0,0," + Math.round(d*10) + ")"; });
+
+	svg.selectAll("text")
+		.data(dataset)
+		.enter()
+		.append("text")
+		.text(function(d) {return d; } )
+		.attr("x", function(d,i) {
+			return xScale(i) + xScale.bandwidth()/2 - 7;
+		})
+		.attr("y", function(d) { return height - yScale(d) + 15; })
+		.attr("font-family","sans-serif")
+		.attr("font-size","11px")
+		.attr("fill","white");
+	
+	d3.select("p")
+		.on("click", function() {	
+			var numValues = dataset.length;
+			dataset = [];
+			for (var i = 0; i < numValues; i++) {
+				var newNumber = Math.floor(Math.random() * 25);
+				dataset.push(newNumber);
+			}
+
+			svg.selectAll("rect")
+				.data(dataset)
+				.transition()
+				.duration(2000)
+				// .ease(d3.easeLinear)
+				.delay(function(d,i) { return i*100; })
+				.attr("y", function(d) { 
+					return height - yScale(d); 
+				})
+				.attr("height", function(d) {
+					return yScale(d);
+				})
+				.attr("fill", function(d) { return "rgb(0,0," + Math.round(d*10) + ")"; });
+
+			svg.selectAll("text")
+				.data(dataset)
+				.transition()
+				.delay(function(d,i) { return i*100; })
+				.duration(2000)
+				.text(function(d) {return d; } )
+				.attr("y", function(d) { return height - yScale(d) + 15; })
+				.attr("font-family","sans-serif")
+		});
+
+
+</script>
