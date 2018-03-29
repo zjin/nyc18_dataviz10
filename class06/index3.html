@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		/*border: 1px solid #cc0000;*/
+		overflow: visible;
+		/*padding: 30px;*/
+	}
+
+	rect.whaaa {
+		stroke: orange;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	div {
+		/*float: left;*/
+		/*width: 200px;*/
+		display: inline-block;
+		margin-right: 10px;
+	}
+
+	circle.us-median {
+		fill: steelblue;
+		stroke: #fff;
+	}
+
+
+	circle.country {
+		fill: lightgrey;
+		stroke: #fff;
+	}
+
+	.us-median {
+		fill: none;
+  		stroke: steelblue;
+  		stroke-width: 2px;
+	}
+
+	.country {
+		fill: none;
+  		stroke: lightgrey;
+  		stroke-width: 2px;
+	}
+	.label {
+		font-size: 12px;
+	}
+	.cuteoff-group {
+		overflow-y: none
+	}
+  }
+
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 10, bottom: 40, left: 10};
+
+	var height = 300 - margin.top - margin.bottom;
+	var width = 100 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Class # 6");
+	body.append("h2")
+		.text("Incomes")
+		
+	d3.csv("incomes.csv",ready);
+
+	function ready(err, data) {
+
+		if (err) throw "Error loading data";
+
+
+		var maxY = d3.max(data, function(d) { return +d.val; });
+
+		var minX = d3.min(data, function(d) { return +d.year; });
+		var maxX = d3.max(data, function(d) { return +d.year; })
+
+		var xScale = d3.scaleLinear()
+			.domain([minX,maxX])
+			.range([0, width]);
+
+		var yScale = d3.scaleLinear()
+			.domain([0, maxY])
+			.range([height,0]);
+
+		var x_axis = d3.axisBottom()
+					.scale(xScale);
+
+		var y_axis = d3.axisRight()
+					.scale(yScale);
+
+		line = d3.line()
+		    .x(function(d) { return xScale(d.year); })
+  			.y(function(d) { return yScale(d.val); });
+
+
+		// mydata = data.filter(function(d) {
+		// 	return d.cutoff == "cop50" && countries.indexOf(d.country) > -1;
+		// })
+
+
+		var mydata = d3.nest()
+			.key(function(d) {return d.cutoff; })
+			.key(function(d) {return d.country; })
+			.entries(data);
+
+		mydata.forEach(function(cutoff) {
+			cutoff.values.forEach(function(country) {
+				country.firstPoint = country.values[0];
+				country.lastPoint = country.values[country.values.length-1];
+			})
+		});
+
+		console.log(mydata);
+
+		var cutoffGroup = body.selectAll(".country-group")
+			.data(mydata)
+			.enter()
+			.append("div")
+			.attr("class","cutoff-group")
+			.classed("last-cutoff-group", function(d,i) {
+				return i == (mydata.length - 1)
+			})
+
+		var svg = cutoffGroup.append("svg")
+			.attr('width',width+margin.left+margin.right)
+			.attr('height',height+margin.top+margin.bottom)
+			.append('g')
+    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+		svg.append('g')
+			.attr('transform','translate(0,'+(height)+')')
+			.call(x_axis
+				.tickValues([minX,maxX])
+				.tickFormat(d3.format(".0f")));
+		svg.append("text")
+			.text(function(d) {return d.key; })
+			.attr("x",width/2-17)
+			.attr("y",height+40)
+
+
+		svg.append('g')
+			.attr('transform','translate('+(width)+',0)')
+			.call(y_axis
+				.tickFormat(d3.format("$,")));
+
+  		
+  		var countryGroup = svg.selectAll(".country-group")
+  			.data(function(d) { return d.values; })
+  			.enter()
+  			.append("g")
+  			.attr("class",function(d) { return d.key == "United States" ? "us-median" : "country" });
+
+
+		countryGroup.append("path")
+			.attr("d",function(d) { return line(d.values); });
+
+		// svg.append("path")
+		// 	.attr("d",function(d) { return line(d.values); })
+		// 	.attr("class","country");
+
+		// svg.append("path")
+		// 	.attr("d",line(usData))
+		// 	.attr("class","us-median");
+
+
+	};
+
+</script>

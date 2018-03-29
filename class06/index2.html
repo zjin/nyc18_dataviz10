@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		border: 1px solid #cc0000;
+		overflow: visible;
+		/*padding: 30px;*/
+	}
+
+	rect.whaaa {
+		stroke: orange;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	circle.us-median {
+		fill: steelblue;
+		stroke: #fff;
+	}
+
+
+	circle.country {
+		fill: lightgrey;
+		stroke: #fff;
+	}
+
+	.us-median {
+		fill: none;
+  		stroke: steelblue;
+  		stroke-width: 2px;
+	}
+
+	.country {
+		fill: none;
+  		stroke: lightgrey;
+  		stroke-width: 2px;
+	}
+
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 50, bottom: 30, left: 0};
+
+	var height = 300 - margin.top - margin.bottom;
+	var width = 500 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Class # 6");
+	body.append("h2")
+		.text("Incomes")
+		
+	d3.csv("incomes.csv",ready);
+
+	function ready(err, data) {
+
+		if (err) throw "Error loading data";
+
+
+		var maxY = d3.max(data, function(d) { return +d.val; });
+
+		var minX = d3.min(data, function(d) { return +d.year; });
+		var maxX = d3.max(data, function(d) { return +d.year; })
+
+		var xScale = d3.scaleLinear()
+			.domain([minX,maxX])
+			.range([0, width]);
+
+		var yScale = d3.scaleLinear()
+			.domain([0, maxY])
+			.range([height,0]);
+
+		var x_axis = d3.axisBottom()
+					.scale(xScale);
+
+		var y_axis = d3.axisRight()
+					.scale(yScale);
+
+		line = d3.line()
+		    .x(function(d) { return xScale(d.year); })
+  			.y(function(d) { return yScale(d.val); });
+
+		mydata = data.filter(function(d) {
+			return d.cutoff == "cop50";
+		})
+
+
+		var dataByCountry = d3.nest()
+			.key(function(d) {return d.country; })
+			.key(function(d) {return d.country; })
+			.entries(mydata);
+
+		var nonUSDataByCountry = dataByCountry.filter(function(d) {
+		 return d.key != "United States"; });
+
+		var usData = mydata.filter(function(d) {
+			return d.country == "United States";
+		})
+
+		nonUSDataByCountry.forEach(function(d) {
+	      d.values.push({key:"United States",values:usData});
+	    })
+
+		var countryDiv = body.selectAll(".country-group")
+			.data(nonUSDataByCountry)
+			.enter()
+			.append("div")
+			.attr("class","country-group");
+
+		countryDiv.append("h3")
+			.text(function(d) { return d.key; });
+
+		var svg = countryDiv.append("svg")
+			.attr('width',width+margin.left+margin.right)
+			.attr('height',height+margin.top+margin.bottom)
+			.append('g')
+    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+		svg.append('g')
+			.attr('transform','translate(0,'+(height)+')')
+			.call(x_axis
+				.tickFormat(function(d) { return d; }));
+
+		var formatComma = d3.format(","),
+			formatMoney = function(d) { return "$" + formatComma(d); };
+
+		svg.append('g')
+			.attr('transform','translate('+(width)+',0)')
+			.call(y_axis
+				.tickFormat(function(d) { return formatMoney(d); }));
+
+
+
+
+  		var countryGroup = svg.selectAll(".country-group")
+  			.data(function(d) { return d.values; })
+  			.enter()
+  		// var countryGroup = svg
+  			.append("g")
+  			// .attr("class","country");
+  			.attr("class",function(d) { return d.key == "United States" ? "us-median" : "country" });
+
+
+  		
+		countryGroup.append("path")
+			.attr("d",function(d) { return line(d.values); });
+
+	
+		countryGroup.selectAll("circle")
+			.data(function(d) { return d.values; })
+			.enter()
+			.append("circle")
+			.attr("class", function(d) { return d.country == "United States" ? "us-median" : "country" })
+			.attr("r",3)
+			.attr("cx",function(d) { return xScale(d.year); })
+			.attr("cy",function(d) { return yScale(d.val); });	
+
+
+	};
+
+</script>
