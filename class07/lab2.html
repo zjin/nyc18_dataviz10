@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+	svg {
+		/*border: 1px solid #cc0000;*/
+		overflow: visible;
+		/*padding: 30px;*/
+	}
+
+	rect.whaaa {
+		stroke: orange;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	div {
+		/*float: left;*/
+		/*width: 200px;*/
+/*		display: inline-block;
+		margin-right: 10px;
+*/	}
+
+	circle.us-median {
+		fill: steelblue;
+		stroke: #fff;
+	}
+
+	circle {
+		fill: steelblue;
+		stroke: #fff;
+	}
+
+	circle.country {
+		fill: lightgrey;
+		stroke: #fff;
+	}
+
+	.us-median {
+		fill: none;
+  		stroke: steelblue;
+  		stroke-width: 2px;
+	}
+
+	.country {
+		fill: none;
+  		stroke: lightgrey;
+  		stroke-width: 2px;
+	}
+	.label {
+		font-size: 12px;
+	}
+	.cuteoff-group {
+		
+	}
+	.country-line {
+		visibility: hidden;
+	}
+  }
+
+</style>
+
+<body>
+
+</body>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+	var margin = {top: 20, right: 10, bottom: 40, left: 40};
+
+	var height = 300 - margin.top - margin.bottom;
+	var width = 400 - margin.left - margin.right;
+
+	var body = d3.select("body");
+
+	body.append("h1")
+		.text("Class # 7");
+	body.append("h2")
+		.text("Lab 2: Incomes")
+
+
+
+	d3.csv("incomes.csv",ready);
+
+	function ready(err, data) {
+
+		if (err) throw "Error loading data";
+
+		// get a list of country
+		var countries = d3.set(data.map(function(d) { return d.country; })).values();
+
+		console.log(countries)
+
+		var countryButton = body.selectAll(".country-button")
+			.data(countries)
+			.enter()
+			.append("button")
+			.text(function(d) { return d; })
+			.on("click",updateData);
+
+		function updateData(userCountry)
+		{
+			console.log(userCountry)
+
+			var mydata = data.filter(function(d) {
+			return d.cutoff == "cop50" && d.country == userCountry;
+			});
+
+			console.log(mydata)
+
+			xScale.domain(d3.extent(mydata, function(d) {
+				return d.year;
+			}));
+
+			svg.selectAll(".x.axis")
+				.transition()
+				.duration(1000)
+				.call(x_axis)
+
+
+			var maxY = d3.max(mydata, function(d) { return +d.val; });
+
+			yScale.domain([0,maxY]);
+
+			console.log(maxY)
+
+			svg.selectAll(".y.axis")
+				.transition()
+				.duration(1000)
+				.call(y_axis);	
+
+			// svg.append("path")
+			// 	.attr("class","country")
+			// 	.attr("d",line(mydata));
+
+			svg.selectAll(".country")
+				.transition()
+				.duration(1000)
+				.attr("d",line(mydata));
+
+			var circleUpdate = svg.selectAll("circle")
+				.data(mydata);
+
+			// are there new elements I need to add?	
+			var circleEnter = circleUpdate.enter()
+				.append("circle")
+				.attr("class", "enter")
+				.style("fill","green")
+				.attr("r",4)
+				.attr("cx",function(d) { return xScale(d.year); })
+				.attr("cy",function(d) { return yScale(d.val); })
+
+			// are there circles that need to get removed?
+			var circleExit = circleUpdate.exit()
+				.attr("class","exit")
+				.style("fill","red")
+				.remove();
+
+			svg.selectAll("circle")
+				.transition()
+				.duration(1000)
+				.attr("cx",function(d) { return xScale(d.year); })
+				.attr("cy",function(d) { return yScale(d.val); })
+
+		}
+		// countries.forEach(function(d) {
+		// 	body.append("button")
+		// 		.text(d)
+		// 		.on("click",updateData);	
+
+		// });
+
+
+
+		// var minX = d3.min(data, function(d) { return +d.year; });
+		// var maxX = d3.max(data, function(d) { return +d.year; })
+
+		var selectedCountry = "United States"
+		var mydata = data.filter(function(d) {
+			return d.cutoff == "cop50" && d.country == selectedCountry;
+		});
+
+		var maxY = d3.max(mydata, function(d) { return +d.val; });
+
+		var xScale = d3.scaleLinear()
+			.domain(d3.extent(mydata, function(d) { return d.year; }))
+			.range([0, width]);
+
+		var yScale = d3.scaleLinear()
+			.domain([0, maxY])
+			.range([height,0]);
+
+		var x_axis = d3.axisBottom()
+					.scale(xScale);
+
+		var y_axis = d3.axisLeft()
+					.scale(yScale);
+
+		line = d3.line()
+		    .x(function(d) { return xScale(d.year); })
+  			.y(function(d) { return yScale(d.val); });
+
+		var svg = body.append("svg")
+			.attr('width',width+margin.left+margin.right)
+			.attr('height',height+margin.top+margin.bottom)
+			.append('g')
+    		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+		svg.append('g')
+			.attr("class","x axis")
+			.attr('transform','translate(0,'+(height)+')')
+			.call(x_axis
+				.tickFormat(d3.format(".0f")));
+
+		svg.append("g")
+			.attr("class","y axis")
+			.attr('transform','translate(0,0)')
+			.call(y_axis
+				.tickFormat(d3.format("$,")));
+
+  		
+  		// option 1
+		// svg.append("path")
+		// 	.attr("class","country")
+		// 	.attr("d",line(mydata));
+
+		// option 2
+		svg.append("path")
+			.datum(mydata)
+			.attr("class","country")
+			.attr("d",line);
+
+		svg.selectAll("circle")
+			.data(mydata)
+			.enter()
+			.append("circle")
+			.attr("class","country-circle")
+			.attr("r",4)
+			.attr("cx",function(d) { return xScale(d.year); })
+			.attr("cy",function(d) { return yScale(d.val); })
+	};
+
+</script>

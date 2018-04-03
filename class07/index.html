@@ -49,6 +49,9 @@
 	.cuteoff-group {
 		
 	}
+	.country-line {
+		visibility: hidden;
+	}
   }
 
 </style>
@@ -69,10 +72,53 @@
 	var body = d3.select("body");
 
 	body.append("h1")
-		.text("Class # 6");
+		.text("Class # 7");
 	body.append("h2")
 		.text("Incomes")
-		
+	body.append("button")
+		.text("show line")
+		.on("click",updateData)
+		// .attr("on")
+	body.append("h2")
+		.text(" ")
+
+	function updateData()
+	{
+		console.log("hello22")
+		// action_type = body.select("button").attr("text")
+
+		var btn = body.select("button")
+
+		// console.log(btn.text())
+		action_type = btn.text()
+		// var btn = 
+		// console.log(action_type)
+		if (action_type === "show line")
+		{
+			body.selectAll(".country-path")
+				.style("visibility", "hidden");
+
+			body.selectAll(".country-line")
+				.style("visibility","visible");	
+
+			body.select("button")
+				.text("show path")
+		}
+		else 
+		{
+			body.selectAll(".country-path")
+				.style("visibility", "visible");
+
+			body.selectAll(".country-line")
+				.style("visibility","hidden");	
+
+			body.select("button")
+				.text("show line")
+
+		}
+
+	}
+
 	d3.csv("incomes.csv",ready);
 
 	function ready(err, data) {
@@ -150,10 +196,10 @@
 			.attr("y",height+40)
 
 
-		svg.append('g')
-			.attr('transform','translate('+(width)+',0)')
-			.call(y_axis
-				.tickFormat(d3.format("$,")));
+		// svg.append('g')
+		// 	.attr('transform','translate('+(width)+',0)')
+		// 	.call(y_axis
+		// 		.tickFormat(d3.format("$,")));
 
   		
   		var countryGroup = svg.selectAll(".country-group")
@@ -164,7 +210,18 @@
 
 
 		countryGroup.append("path")
+			.attr("class","country-path")
 			.attr("d",function(d) { return line(d.values); });
+
+
+		// countryGroup.append("line")
+			// .attr("x1", function(d) { return d.firstPoint.year; })
+			// .attr("y1", function(d) { return d.firstPoint.val; })
+			// .attr("x2", function(d) { return d.lastPoint.year; })
+			// .attr("y2", function(d) { return d.lastPoint.val; })
+		countryGroup.append("path")
+			.attr("class","country-line")
+			.attr("d", function(d) { return line([d.firstPoint, d.lastPoint]); })
 
 		// svg.append("path")
 		// 	.attr("d",function(d) { return line(d.values); })

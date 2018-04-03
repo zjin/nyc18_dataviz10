@@ -72,7 +72,13 @@
 			.key(function(d) {return d.country; })
 			.entries(mydata);
 
-		console.log(dataByCountry)
+		var usData = dataByCountry.filter(function(d) {
+			return d.key == "United States";
+		})
+
+
+		
+		console.log(usData)
 
 		var svg = body.append("svg")
 			.attr('width',width+margin.left+margin.right)
